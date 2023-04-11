@@ -173,7 +173,7 @@ eventEmitter(Viewer);
 /**
  * Destructor.
  */
-Viewer.prototype.destroy = function() {
+Viewer.prototype.destroy = function () {
 
   window.removeEventListener('resize', this._updateSizeListener);
 
@@ -216,7 +216,7 @@ Viewer.prototype.destroy = function() {
  * This method is automatically called when the browser window is resized.
  * Most clients won't need to explicitly call it to keep the size up to date.
  */
-Viewer.prototype.updateSize = function() {
+Viewer.prototype.updateSize = function () {
   var size = this._size;
   size.width = this._domElement.clientWidth;
   size.height = this._domElement.clientHeight;
@@ -228,7 +228,7 @@ Viewer.prototype.updateSize = function() {
  * Returns the underlying {@link Stage stage}.
  * @return {Stage}
  */
-Viewer.prototype.stage = function() {
+Viewer.prototype.stage = function () {
   return this._stage;
 };
 
@@ -237,7 +237,7 @@ Viewer.prototype.stage = function() {
  * Returns the underlying {@link RenderLoop render loop}.
  * @return {RenderLoop}
  */
-Viewer.prototype.renderLoop = function() {
+Viewer.prototype.renderLoop = function () {
   return this._renderLoop;
 };
 
@@ -246,7 +246,7 @@ Viewer.prototype.renderLoop = function() {
  * Returns the underlying {@link Controls controls}.
  * @return {Controls}
  */
-Viewer.prototype.controls = function() {
+Viewer.prototype.controls = function () {
   return this._controls;
 };
 
@@ -255,7 +255,7 @@ Viewer.prototype.controls = function() {
  * Returns the underlying DOM element.
  * @return {Element}
  */
-Viewer.prototype.domElement = function() {
+Viewer.prototype.domElement = function () {
   return this._domElement;
 };
 
@@ -279,7 +279,7 @@ Viewer.prototype.domElement = function() {
  *     constructor.
  * @return {Scene}
  */
-Viewer.prototype.createScene = function(opts) {
+Viewer.prototype.createScene = function (opts) {
   opts = opts || {};
 
   var scene = this.createEmptyScene({ view: opts.view });
@@ -287,6 +287,7 @@ Viewer.prototype.createScene = function(opts) {
   scene.createLayer({
     source: opts.source,
     geometry: opts.geometry,
+    depthmap: opts.depthmap,
     pinFirstLevel: opts.pinFirstLevel,
     textureStoreOpts: opts.textureStoreOpts,
     layerOpts: opts.layerOpts
@@ -310,7 +311,7 @@ Viewer.prototype.createScene = function(opts) {
  * @param {View} opts.view The scene's underlying {@link View}.
  * @return {Scene}
  */
-Viewer.prototype.createEmptyScene = function(opts) {
+Viewer.prototype.createEmptyScene = function (opts) {
   opts = opts || {};
 
   var scene = new Scene(this, opts.view);
@@ -320,7 +321,7 @@ Viewer.prototype.createEmptyScene = function(opts) {
 };
 
 
-Viewer.prototype._updateSceneLayers = function() {
+Viewer.prototype._updateSceneLayers = function () {
   var i;
   var layer;
 
@@ -371,7 +372,7 @@ Viewer.prototype._updateSceneLayers = function() {
 };
 
 
-Viewer.prototype._addLayerToStage = function(layer, i) {
+Viewer.prototype._addLayerToStage = function (layer, i) {
   // Pin the first level to ensure a fallback while the layer is visible.
   // Note that this is distinct from the `pinFirstLevel` option passed to
   // createScene(), which pins the layer even when it's not visible.
@@ -380,20 +381,20 @@ Viewer.prototype._addLayerToStage = function(layer, i) {
 };
 
 
-Viewer.prototype._removeLayerFromStage = function(layer) {
+Viewer.prototype._removeLayerFromStage = function (layer) {
   this._stage.removeLayer(layer);
   layer.unpinFirstLevel();
   layer.textureStore().clearNotPinned();
 };
 
 
-Viewer.prototype._addSceneEventListeners = function(scene) {
+Viewer.prototype._addSceneEventListeners = function (scene) {
   scene.addEventListener('layerChange', this._layerChangeHandler);
   scene.addEventListener('viewChange', this._viewChangeHandler);
 };
 
 
-Viewer.prototype._removeSceneEventListeners = function(scene) {
+Viewer.prototype._removeSceneEventListeners = function (scene) {
   scene.removeEventListener('layerChange', this._layerChangeHandler);
   scene.removeEventListener('viewChange', this._viewChangeHandler);
 };
@@ -403,7 +404,7 @@ Viewer.prototype._removeSceneEventListeners = function(scene) {
  * Destroys a {@link Scene scene} and removes it from the viewer.
  * @param {Scene} scene
  */
-Viewer.prototype.destroyScene = function(scene) {
+Viewer.prototype.destroyScene = function (scene) {
   var i = this._scenes.indexOf(scene);
   if (i < 0) {
     throw new Error('No such scene in viewer');
@@ -448,7 +449,7 @@ Viewer.prototype.destroyScene = function(scene) {
 /**
  * Destroys all {@link Scene scenes} and removes them from the viewer.
  */
-Viewer.prototype.destroyAllScenes = function() {
+Viewer.prototype.destroyAllScenes = function () {
   while (this._scenes.length > 0) {
     this.destroyScene(this._scenes[0]);
   }
@@ -460,7 +461,7 @@ Viewer.prototype.destroyAllScenes = function() {
  * @param {Scene} scene
  * @return {boolean}
  */
-Viewer.prototype.hasScene = function(scene) {
+Viewer.prototype.hasScene = function (scene) {
   return this._scenes.indexOf(scene) >= 0;
 };
 
@@ -469,7 +470,7 @@ Viewer.prototype.hasScene = function(scene) {
  * Returns a list of all {@link Scene scenes}.
  * @return {Scene[]}
  */
-Viewer.prototype.listScenes = function() {
+Viewer.prototype.listScenes = function () {
   return [].concat(this._scenes);
 };
 
@@ -481,7 +482,7 @@ Viewer.prototype.listScenes = function() {
  *
  * @return {Scene}
  */
-Viewer.prototype.scene = function() {
+Viewer.prototype.scene = function () {
   return this._currentScene;
 };
 
@@ -491,7 +492,7 @@ Viewer.prototype.scene = function() {
  * if there isn't one.
  * @return {View}
  */
-Viewer.prototype.view = function() {
+Viewer.prototype.view = function () {
   var scene = this._currentScene;
   if (scene) {
     return scene.view();
@@ -509,7 +510,7 @@ Viewer.prototype.view = function() {
  * @param {Object} opts Options to pass into {@link Scene#lookTo}.
  * @param {function} done Function to call when the tween is complete.
  */
-Viewer.prototype.lookTo = function(params, opts, done) {
+Viewer.prototype.lookTo = function (params, opts, done) {
   // TODO: is it an error to call lookTo when no scene is displayed?
   var scene = this._currentScene;
   if (scene) {
@@ -528,7 +529,7 @@ Viewer.prototype.lookTo = function(params, opts, done) {
  * @param {function} done Function to be called when the movement finishes or is
  *     interrupted.
  */
-Viewer.prototype.startMovement = function(fn, done) {
+Viewer.prototype.startMovement = function (fn, done) {
   var scene = this._currentScene;
   if (!scene) {
     return;
@@ -543,7 +544,7 @@ Viewer.prototype.startMovement = function(fn, done) {
  * This method is equivalent to calling {@link Scene#stopMovement} on the
  * current scene. If there is no current scene, this is a no-op.
  */
-Viewer.prototype.stopMovement = function() {
+Viewer.prototype.stopMovement = function () {
   var scene = this._currentScene;
   if (!scene) {
     return;
@@ -560,7 +561,7 @@ Viewer.prototype.stopMovement = function() {
  *
  * @return {function}
  */
-Viewer.prototype.movement = function() {
+Viewer.prototype.movement = function () {
   var scene = this._currentScene;
   if (!scene) {
     return;
@@ -580,7 +581,7 @@ Viewer.prototype.movement = function() {
  * @param {number} timeout Timeout period in milliseconds.
  * @param {function} movement Automatic movement function, or null to disable.
  */
-Viewer.prototype.setIdleMovement = function(timeout, movement) {
+Viewer.prototype.setIdleMovement = function (timeout, movement) {
   this._idleTimer.setDuration(timeout);
   this._idleMovement = movement;
 };
@@ -590,18 +591,18 @@ Viewer.prototype.setIdleMovement = function(timeout, movement) {
  * Stops the idle movement. It will be started again after the timeout set by
  * {@link Viewer#setIdleMovement}.
  */
-Viewer.prototype.breakIdleMovement = function() {
+Viewer.prototype.breakIdleMovement = function () {
   this.stopMovement();
   this._resetIdleTimer();
 };
 
 
-Viewer.prototype._resetIdleTimer = function() {
+Viewer.prototype._resetIdleTimer = function () {
   this._idleTimer.start();
 };
 
 
-Viewer.prototype._triggerIdleTimer = function() {
+Viewer.prototype._triggerIdleTimer = function () {
   var idleMovement = this._idleMovement;
   if (!idleMovement) {
     return;
@@ -614,7 +615,7 @@ var defaultSwitchDuration = 1000;
 
 function defaultTransitionUpdate(val, newScene, oldScene) {
   var layers = newScene.listLayers();
-  layers.forEach(function(layer) {
+  layers.forEach(function (layer) {
     layer.mergeEffects({ opacity: val });
   });
 
@@ -642,7 +643,7 @@ function defaultTransitionUpdate(val, newScene, oldScene) {
  *     interrupted. If the new scene is equal to the old one, no transition
  *     takes place, but this function is still called.
  */
-Viewer.prototype.switchScene = function(newScene, opts, done) {
+Viewer.prototype.switchScene = function (newScene, opts, done) {
   var self = this;
 
   opts = opts || {};
@@ -677,15 +678,15 @@ Viewer.prototype.switchScene = function(newScene, opts, done) {
   // and that the top layer is the right one. If this test fails, either there
   // is a bug or the user tried to modify the stage concurrently.
   if (oldScene && ((stageLayers.length !== oldSceneLayers.length) ||
-      (stageLayers.length > 1 && stageLayers[0] != oldSceneLayers[0]))) {
+    (stageLayers.length > 1 && stageLayers[0] != oldSceneLayers[0]))) {
     throw new Error('Stage not in sync with viewer');
   }
 
   // Get the transition parameters.
   var duration = opts.transitionDuration != null ?
-      opts.transitionDuration : defaultSwitchDuration;
+    opts.transitionDuration : defaultSwitchDuration;
   var update = opts.transitionUpdate != null ?
-      opts.transitionUpdate : defaultTransitionUpdate;
+    opts.transitionUpdate : defaultTransitionUpdate;
 
   // Add new scene layers into the stage before starting the transition.
   for (var i = 0; i < newSceneLayers.length; i++) {

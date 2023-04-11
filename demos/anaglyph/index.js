@@ -56,7 +56,7 @@ function createLayer(stage, view, geometry, eye) {
   var textureStore = new Marzipano.TextureStore(source, stage);
 
   // Create the layer.
-  var layer = new Marzipano.Layer(source, geometry, view, textureStore);
+  var layer = new Marzipano.Layer(source, geometry, null, view, textureStore, null);
 
   layer.pinFirstLevel();
 

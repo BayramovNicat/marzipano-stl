@@ -292,6 +292,9 @@ Stage.prototype.addLayer = function(layer, i) {
   this.validateLayer(layer); // must be defined by subclasses.
 
   var geometryType = layer.geometry().type;
+  if (layer.depthmap()) {
+    geometryType += '+depth';
+  }
   var viewType = layer.view().type;
   var rendererClass = this._rendererRegistry.get(geometryType, viewType);
   if (!rendererClass) {

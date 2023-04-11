@@ -22,13 +22,13 @@ var eventEmitter = require('minimal-event-emitter');
 
 var Layer = require('../../src/Layer');
 
-function MockStage() {}
+function MockStage() { }
 
-function MockSource() {}
+function MockSource() { }
 
-function MockTile() {}
+function MockTile() { }
 
-function MockLevel() {}
+function MockLevel() { }
 
 function MockGeometry(levelList) {
   this.levelList = levelList;
@@ -37,7 +37,7 @@ function MockGeometry(levelList) {
 }
 
 function MockView(selectedLevel) {
-  this.selectLevel = function() { return selectedLevel; }
+  this.selectLevel = function () { return selectedLevel; }
 }
 eventEmitter(MockView);
 
@@ -47,7 +47,7 @@ function MockTextureStore() {
 }
 eventEmitter(MockTextureStore);
 
-suite('Layer', function() {
+suite('Layer', function () {
 
   var stage;
   var source;
@@ -59,7 +59,7 @@ suite('Layer', function() {
   var selectedLevel = levelList[2];
   var tileList = [new MockTile(), new MockTile()];
 
-  setup(function() {
+  setup(function () {
     stage = new MockStage();
     source = new MockSource();
     geometry = new MockGeometry(levelList);
@@ -67,27 +67,27 @@ suite('Layer', function() {
     textureStore = new MockTextureStore();
   });
 
-  teardown(function() {
+  teardown(function () {
     stage = source = geometry = view = textureStore = null;
   });
 
-  test('getters', function() {
-    var layer = new Layer(source, geometry, view, textureStore);
+  test('getters', function () {
+    var layer = new Layer(source, geometry, null, view, textureStore, null);
     assert.strictEqual(source, layer.source());
     assert.strictEqual(geometry, layer.geometry());
     assert.strictEqual(view, layer.view());
     assert.strictEqual(textureStore, layer.textureStore());
   });
 
-  test('visible tiles', function() {
-    var layer = new Layer(source, geometry, view, textureStore);
+  test('visible tiles', function () {
+    var layer = new Layer(source, geometry, null, view, textureStore, null);
     var tiles = [];
     layer.visibleTiles(tiles);
     assert.isTrue(geometry.visibleTiles.calledWithExactly(view, selectedLevel, tiles));
   });
 
-  test('fixed level', function() {
-    var layer = new Layer(source, geometry, view, textureStore);
+  test('fixed level', function () {
+    var layer = new Layer(source, geometry, null, view, textureStore, null);
     var spy = sinon.spy();
     layer.addEventListener('fixedLevelChange', spy);
 
@@ -108,8 +108,8 @@ suite('Layer', function() {
     assert.isTrue(geometry.visibleTiles.calledWithExactly(view, selectedLevel, tiles));
   });
 
-  test('pin level', function() {
-    var layer = new Layer(source, geometry, view, textureStore);
+  test('pin level', function () {
+    var layer = new Layer(source, geometry, null, view, textureStore, null);
     geometry.levelTiles.returns(tileList);
     layer.pinLevel(1);
     assert.isTrue(geometry.levelTiles.withArgs(levelList[1]).calledOnce);
@@ -123,8 +123,8 @@ suite('Layer', function() {
     }
   });
 
-  test('pin first level', function() {
-    var layer = new Layer(source, geometry, view, textureStore);
+  test('pin first level', function () {
+    var layer = new Layer(source, geometry, null, view, textureStore, null);
     geometry.levelTiles.returns(tileList);
     layer.pinFirstLevel();
     assert.isTrue(geometry.levelTiles.withArgs(levelList[0]).calledOnce);
@@ -138,16 +138,16 @@ suite('Layer', function() {
     }
   });
 
-  test('view events', function() {
-    var layer = new Layer(source, geometry, view, textureStore);
+  test('view events', function () {
+    var layer = new Layer(source, geometry, null, view, textureStore, null);
     var spy = sinon.spy();
     layer.addEventListener('viewChange', spy);
     view.emit('change');
     assert.isTrue(spy.calledOnce);
   });
 
-  test('texture store events', function() {
-    var layer = new Layer(source, geometry, view, textureStore);
+  test('texture store events', function () {
+    var layer = new Layer(source, geometry, null, view, textureStore, null);
     var spy = sinon.spy();
     layer.addEventListener('textureStoreChange', spy);
     textureStore.emit('textureStartLoad');

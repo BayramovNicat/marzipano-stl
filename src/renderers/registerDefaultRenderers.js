@@ -15,8 +15,9 @@
  */
 'use strict';
 
-var WebGlCube = require('./WebGlCube');
 var WebGlFlat = require('./WebGlFlat');
+var WebGlCube = require('./WebGlCube');
+var WebGlCubeDepth = require('./WebGlCubeDepth');
 var WebGlEquirect = require('./WebGlEquirect');
 
 /**
@@ -32,6 +33,7 @@ function registerDefaultRenderers(stage) {
     case 'webgl':
       stage.registerRenderer('flat', 'flat', WebGlFlat);
       stage.registerRenderer('cube', 'rectilinear', WebGlCube);
+      stage.registerRenderer('cube+depth', 'rectilinear', WebGlCubeDepth);
       stage.registerRenderer('equirect', 'rectilinear', WebGlEquirect);
       break;
     default:

@@ -33,7 +33,7 @@ var sourceBelow = new Marzipano.ImageUrlSource(function(tile) {
 });
 var textureStoreBelow = new Marzipano.TextureStore(sourceBelow, stage);
 var layerBelow = new Marzipano.Layer(
-    sourceBelow, geometryBelow, view, textureStoreBelow, { effects: { opacity: 1 } });
+    sourceBelow, geometryBelow, null, view, textureStoreBelow, null, { effects: { opacity: 1 } });
 
 // Set up the top layer.
 var levelsAbove = [512, 1024, 2048, 4096].map(function(size) {
@@ -46,7 +46,7 @@ var sourceAbove = new Marzipano.ImageUrlSource(function(tile) {
 });
 var textureStoreAbove = new Marzipano.TextureStore(sourceAbove, stage);
 var layerAbove = new Marzipano.Layer(
-    sourceAbove, geometryAbove, view, textureStoreAbove, { effects: { opacity: 0.6 } });
+    sourceAbove, geometryAbove, null, view, textureStoreAbove, null, { effects: { opacity: 0.6 } });
 
 // Add layers to stage.
 stage.addLayer(layerBelow);
