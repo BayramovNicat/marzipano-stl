@@ -39,6 +39,7 @@ var defaultRoll = 0;
 var defaultFov = Math.PI/4;
 var defaultProjectionCenterX = 0;
 var defaultProjectionCenterY = 0;
+var defaultPosition = [0.0, 0.0, 0.0];
 
 // A fov of exactly 0 or π breaks some computations, so we constrain it to the
 // [fovLimitEpsilon, π - fovLimitEpsilon] interval. We use 6 decimal places for
@@ -122,12 +123,22 @@ function RectilinearView(params, limiter) {
   this._projectionCenterY = params && params.projectionCenterY != null ?
     params.projectionCenterY : defaultProjectionCenterY;
 
+  // The camera's position.
+  this._position = params && params.position != null ? params.position : defaultPosition;
+
+  // TODO Add it here for now.
+  this._invertControl = params && params.invertControl != null ? params.invertControl : false;
+
   // The initial value for the view limiter.
   this._limiter = limiter || null;
 
   // The last calculated projection matrix and its inverse.
   this._projMatrix = mat4.create();
   this._invProjMatrix = mat4.create();
+
+  // The last calculated view matrix and its inverse.
+  this._viewMatrix = mat4.create();
+  this._invViewMatrix = mat4.create();
 
   // The last calculated view frustum.
   this._frustum = [
@@ -139,7 +150,7 @@ function RectilinearView(params, limiter) {
   ];
 
   // Whether the projection matrices and the view frustum need to be updated.
-  this._projectionChanged = true;
+  this._matrixChanged = true;
 
   // Temporary variables used for calculations.
   this._params = {};
@@ -197,7 +208,6 @@ RectilinearView.prototype.projectionCenterY = function() {
   return this._projectionCenterY;
 };
 
-
 /**
  * Get the fov value.
  * @return {number}
@@ -224,6 +234,13 @@ RectilinearView.prototype.height = function() {
   return this._height;
 };
 
+/**
+ * Get the camera's position.
+ * @return {vec3}
+ */
+RectilinearView.prototype.position = function() {
+  return this._position;
+};
 
 /**
  * Get the viewport dimensions. If an argument is supplied, it is filled in with
@@ -369,6 +386,17 @@ RectilinearView.prototype.setSize = function(size) {
   this._update(this._params);
 };
 
+/**
+ * Set the camera's position.
+ * @param {number} x
+ * @param {number} y
+ * @param {number} z
+ */
+RectilinearView.prototype.setPosition = function(x, y, z) {
+  this._resetParams();
+  this._params.position = [x, y, z];
+  this._update(this._params);
+}
 
 /**
  * Set the view parameters. Unspecified parameters are left unchanged.
@@ -404,6 +432,7 @@ RectilinearView.prototype._resetParams = function() {
   params.fov = null;
   params.width = null;
   params.height = null;
+  params.position = null;
 };
 
 
@@ -424,6 +453,8 @@ RectilinearView.prototype._update = function(params) {
   var oldProjectionCenterY = this._projectionCenterY;
   var oldWidth = this._width;
   var oldHeight = this._height;
+  
+  var oldPosition = this._position;
 
   // Fill in object with the new set of parameters to pass into the limiter.
   params.yaw = params.yaw != null ? params.yaw : oldYaw;
@@ -436,6 +467,8 @@ RectilinearView.prototype._update = function(params) {
     params.projectionCenterX : oldProjectionCenterX;
   params.projectionCenterY = params.projectionCenterY != null ?
     params.projectionCenterY : oldProjectionCenterY;
+
+  params.position = params.position != null ? params.position : oldPosition;
 
   // Apply view limiting when defined.
   if (this._limiter) {
@@ -458,6 +491,8 @@ RectilinearView.prototype._update = function(params) {
   var newProjectionCenterX = params.projectionCenterX;
   var newProjectionCenterY = params.projectionCenterY;
 
+  var newPosition = params.position;
+
   // Consistency check.
   if (!real(newYaw) || !real(newPitch) || !real(newRoll) ||
       !real(newFov) || !real(newWidth) || !real(newHeight) ||
@@ -474,19 +509,23 @@ RectilinearView.prototype._update = function(params) {
   this._height = newHeight;
   this._projectionCenterX = newProjectionCenterX;
   this._projectionCenterY = newProjectionCenterY;
+  
+  this._position = newPosition;
 
   // Check whether the parameters changed and emit the corresponding events.
   if (newYaw !== oldYaw || newPitch !== oldPitch || newRoll !== oldRoll ||
       newFov !== oldFov || newWidth !== oldWidth || newHeight !== oldHeight ||
       newProjectionCenterX !== oldProjectionCenterX ||
-      newProjectionCenterY !== oldProjectionCenterY) {
-    this._projectionChanged = true;
+      newProjectionCenterY !== oldProjectionCenterY ||
+      newPosition[0] !== oldPosition[0] || 
+      newPosition[1] !== oldPosition[1] || 
+      newPosition[2] !== oldPosition[2]) {
+    this._matrixChanged = true;
     this.emit('change');
   }
   if (newWidth !== oldWidth || newHeight !== oldHeight) {
     this.emit('resize');
   }
-
 };
 
 
@@ -585,12 +624,14 @@ RectilinearView.prototype.updateWithControlParameters = function(parameters) {
 };
 
 
-RectilinearView.prototype._updateProjection = function() {
+RectilinearView.prototype._updateMatrix = function() {
   var projMatrix = this._projMatrix;
   var invProjMatrix = this._invProjMatrix;
+  var viewMatrix = this._viewMatrix;
+  var invViewMatrix = this._invViewMatrix;
   var frustum = this._frustum;
 
-  if (this._projectionChanged) {
+  if (this._matrixChanged) {
     var width = this._width;
     var height = this._height;
 
@@ -601,6 +642,7 @@ RectilinearView.prototype._updateProjection = function() {
     var projectionCenterX = this._projectionCenterX;
     var projectionCenterY = this._projectionCenterY;
 
+    // Projection Matrix.
     if (projectionCenterX !== 0 || projectionCenterY !== 0) {
       var offsetAngleX = Math.atan(projectionCenterX * 2 * Math.tan(hfov/2));
       var offsetAngleY = Math.atan(projectionCenterY * 2 * Math.tan(vfov/2));
@@ -609,23 +651,35 @@ RectilinearView.prototype._updateProjection = function() {
       fovs.rightDegrees = (hfov/2 - offsetAngleX) * 180/Math.PI;
       fovs.upDegrees = (vfov/2 + offsetAngleY) * 180/Math.PI;
       fovs.downDegrees = (vfov/2 - offsetAngleY) * 180/Math.PI;
-      mat4.perspectiveFromFieldOfView(projMatrix, fovs, -1, 1);
+      mat4.perspectiveFromFieldOfView(projMatrix, fovs, 0.1, 100);
     } else {
-      mat4.perspective(projMatrix, vfov, aspect, -1, 1);
+      mat4.perspective(projMatrix, vfov, aspect, 0.1, 100);
     }
-
-    mat4.rotateZ(projMatrix, projMatrix, this._roll);
-    mat4.rotateX(projMatrix, projMatrix, this._pitch);
-    mat4.rotateY(projMatrix, projMatrix, this._yaw);
 
     mat4.invert(invProjMatrix, projMatrix);
 
+    // View Matrix.
+    var eye = this._position;
+    var target = [0.0, 0.0, 0.0];
+    var up = [0.0, 1.0, 0.0];
+    mat4.lookAt(viewMatrix, eye, target, up);
+    
+    // Invert control.
+    var roll = this._invertControl ? -this._roll : this._roll;
+    var pitch = this._pitch;
+    var yaw = this._invertControl ? -this._yaw : this._yaw;
+    
+    mat4.rotateZ(viewMatrix, viewMatrix, roll);
+    mat4.rotateX(viewMatrix, viewMatrix, pitch);
+    mat4.rotateY(viewMatrix, viewMatrix, yaw);
+
+    mat4.invert(invViewMatrix, viewMatrix);
+
     this._matrixToFrustum(projMatrix, frustum);
 
-    this._projectionChanged = false;
+    this._matrixChanged = false;
   }
 };
-
 
 RectilinearView.prototype._matrixToFrustum = function(p, f) {
   // Extract frustum planes from projection matrix.
@@ -643,20 +697,36 @@ RectilinearView.prototype._matrixToFrustum = function(p, f) {
  * @returns {mat4}
  */
 RectilinearView.prototype.projection = function() {
-  this._updateProjection();
+  this._updateMatrix();
   return this._projMatrix;
 };
-
 
 /**
  * Returns the inverse projection matrix for the current view.
  * @returns {mat4}
  */
 RectilinearView.prototype.inverseProjection = function() {
-  this._updateProjection();
+  this._updateMatrix();
   return this._invProjMatrix;
 };
 
+/**
+ * Returns the view matrix for the current view.
+ * @returns {mat4}
+ */
+RectilinearView.prototype.viewMatrix = function() {
+  this._updateMatrix();
+  return this._viewMatrix;
+}
+
+/**
+ * Returns the inverse view matrix for the current view.
+ * @returns {mat4}
+ */
+RectilinearView.prototype.inverseViewMatrix = function() {
+  this._updateMatrix();
+  return this._invViewMatrix;
+}
 
 /**
  * Return whether the view frustum intersects the given rectangle.
@@ -668,7 +738,7 @@ RectilinearView.prototype.inverseProjection = function() {
  * @param {vec2[]} rectangle The vertices of the rectangle.
  */
 RectilinearView.prototype.intersects = function(rectangle) {
-  this._updateProjection();
+  this._updateMatrix();
 
   var frustum = this._frustum;
   var vertex = this._tmpVec;

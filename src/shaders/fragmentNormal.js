@@ -30,7 +30,17 @@ module.exports = [
 'varying vec2 vTextureCoord;',
 
 'void main(void) {',
-'  vec4 color = texture2D(uSampler, vTextureCoord) * uColorMatrix + uColorOffset;',
-'  gl_FragColor = vec4(color.rgba * uOpacity);',
+
+`
+if (!gl_FrontFacing) {
+  discard; // Discard the front-facing triangles
+} else {
+  vec4 color = texture2D(uSampler, vTextureCoord) * uColorMatrix + uColorOffset;
+  gl_FragColor = vec4(color.rgba * uOpacity);
+}
+`,
+
+// '  vec4 color = texture2D(uSampler, vTextureCoord) * uColorMatrix + uColorOffset;',
+// '  gl_FragColor = vec4(color.rgba * uOpacity);',
 '}'
 ].join('\n');

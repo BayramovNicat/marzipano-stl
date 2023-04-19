@@ -41,7 +41,7 @@ var textureCoords = [0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0];
 
 var attribList = ['aVertexPosition', 'aTextureCoord'];
 var uniformList = [
-  'uDepth', 'uOpacity', 'uSampler', 'uProjMatrix', 'uViewportMatrix',
+  'uDepth', 'uOpacity', 'uSampler', 'uProjMatrix', 'uViewMatrix', 'uModelMatrix', 'uViewportMatrix',
   'uColorOffset', 'uColorMatrix'
 ];
 
@@ -53,6 +53,9 @@ function WebGlBaseRenderer(gl) {
   // We compute it in Javascript because lack of precision in the vertex shader
   // causes seams to appear between adjacent tiles at large zoom levels.
   this.projMatrix = mat4.create();
+
+  // TODO Why save this value here? the same question to the projMatrix.
+  this.viewMatrix = mat4.create();
 
   // The viewport matrix responsible for viewport clamping.
   // See setViewport() for an explanation of how it works.
@@ -111,9 +114,18 @@ WebGlBaseRenderer.prototype.renderTile = function(tile, texture, layer, layerZ) 
   var shaderProgram = this.shaderProgram;
   var constantBuffers = this.constantBuffers;
   var projMatrix = this.projMatrix;
+  var viewMatrix = this.viewMatrix;
   var translateVector = this.translateVector;
   var scaleVector = this.scaleVector;
 
+  mat4.copy(projMatrix, layer.view().projection());
+  gl.uniformMatrix4fv(shaderProgram.uProjMatrix, false, projMatrix);
+
+  mat4.copy(viewMatrix, layer.view().viewMatrix());
+  gl.uniformMatrix4fv(shaderProgram.uViewMatrix, false, viewMatrix);
+  
+  // Generate ModelMatrix.
+  // TODO Cache the matrix in the tile object?
   translateVector[0] = tile.centerX();
   translateVector[1] = tile.centerY();
   translateVector[2] = -0.5;
@@ -122,16 +134,15 @@ WebGlBaseRenderer.prototype.renderTile = function(tile, texture, layer, layerZ) 
   scaleVector[1] = tile.scaleY();
   scaleVector[2] = 1.0;
 
-  mat4.copy(projMatrix, layer.view().projection());
-  mat4.rotateX(projMatrix, projMatrix, tile.rotX());
-  mat4.rotateY(projMatrix, projMatrix, tile.rotY());
-  mat4.translate(projMatrix, projMatrix, translateVector);
-  mat4.scale(projMatrix, projMatrix, scaleVector);
+  var modelMatrix = mat4.create();
+  mat4.rotateX(modelMatrix, modelMatrix, tile.rotX());
+  mat4.rotateY(modelMatrix, modelMatrix, tile.rotY());
+  mat4.translate(modelMatrix, modelMatrix, translateVector);
+  mat4.scale(modelMatrix, modelMatrix, scaleVector);
 
-  gl.uniformMatrix4fv(shaderProgram.uProjMatrix, false, projMatrix);
+  gl.uniformMatrix4fv(shaderProgram.uModelMatrix, false, modelMatrix);
 
   setDepth(gl, shaderProgram, layerZ, tile.z);
-
   setTexture(gl, shaderProgram, texture);
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, constantBuffers.vertexIndices);

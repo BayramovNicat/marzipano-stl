@@ -64,10 +64,11 @@ TileSearcher.prototype.search = function(view, startingTile, result) {
       continue;
     }
 
-    if (!view.intersects(tile.vertices(vertices))) {
-      // Skip non-visible tile.
-      continue;
-    }
+    // TODO Testing!!!
+    // if (!view.intersects(tile.vertices(vertices))) {
+    //   // Skip non-visible tile.
+    //   continue;
+    // }
 
     // Mark tile as visited.
     visited.add(tile);

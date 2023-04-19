@@ -22,11 +22,13 @@ module.exports = [
 'uniform float uDepth;',
 'uniform mat4 uViewportMatrix;',
 'uniform mat4 uProjMatrix;',
+'uniform mat4 uViewMatrix;',
+'uniform mat4 uModelMatrix;',
 
 'varying vec2 vTextureCoord;',
 
 'void main(void) {',
-'  gl_Position = uViewportMatrix * uProjMatrix * vec4(aVertexPosition.xy, 0.0, 1.0);',
+'  gl_Position = uViewportMatrix * uProjMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition, 1.0);',
 '  gl_Position.z = uDepth * gl_Position.w;',
 '  vTextureCoord = aTextureCoord;',
 '}'

@@ -128,6 +128,11 @@ function setTexture(gl, shaderProgram, texture) {
   gl.uniform1i(shaderProgram.uSampler, 0);
 }
 
+function setDepthmapTexture(gl, shaderProgram, texture) {
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, texture._texture);
+  gl.uniform1i(shaderProgram.uDepthmap, 1);
+}
 
 function setDepth(gl, shaderProgram, layerZ, tileZ) {
   var depth = (((layerZ + 1) * MAX_LEVELS) - tileZ) / (MAX_LEVELS * MAX_LAYERS);
@@ -226,6 +231,7 @@ module.exports = {
   enableAttributes: enableAttributes,
   disableAttributes: disableAttributes,
   setTexture: setTexture,
+  setDepthmapTexture: setDepthmapTexture,
   setDepth: setDepth,
   setViewport: setViewport,
   setupPixelEffectUniforms: setupPixelEffectUniforms
