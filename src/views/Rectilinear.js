@@ -666,8 +666,8 @@ RectilinearView.prototype._updateMatrix = function() {
     
     // Invert control.
     var roll = this._invertControl ? -this._roll : this._roll;
-    var pitch = this._pitch;
-    var yaw = this._invertControl ? -this._yaw : this._yaw;
+    var pitch = this._invertControl ? -this._pitch :this._pitch;
+    var yaw = this._yaw;
     
     mat4.rotateZ(viewMatrix, viewMatrix, roll);
     mat4.rotateX(viewMatrix, viewMatrix, pitch);

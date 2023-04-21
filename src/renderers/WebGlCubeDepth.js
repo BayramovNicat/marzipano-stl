@@ -21,133 +21,25 @@ var setDepthmapTexture = WebGlCommon.setDepthmapTexture
 var vertexSrc = require('../shaders/vertexCubeDepth');
 var fragmentSrc = require('../shaders/fragmentCubeDepth');
 
-/*
-var vertexIndices = [
-  0, 1, 2, 0, 2, 3, // front
-  4, 5, 6, 4, 6, 7, // back
-  8, 9, 10, 8, 10, 11, // top
-  12, 13, 14, 12, 14, 15, // bottom
-  16, 17, 18, 16, 18, 19, // right
-  20, 21, 22, 20, 22, 23, // left
-];
-var vertexPositions = [
-  // Front face
-  -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
-  // Back face
-  -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0,
-  // Top face
-  -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0,
-  // Bottom face
-  -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0,
-  // Right face
-  1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0,
-  // Left face
-  -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0,
-];
-var textureCoords = [
-  0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,   // Front face.
-  0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,   // Back face.
-  0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,   // Top face.
-  0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,   // Bottom face.
-  0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,   // Right face.
-  0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,   // Left face.
-];
-*/
-
-//var vertexIndices = [0, 1, 2, 0, 2, 3];
-//var vertexPositions = [-0.5, -0.5, 0.0, 0.5, -0.5, 0.0, 0.5, 0.5, 0.0, -0.5, 0.5, 0.0];
-//var textureCoords = [0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0];
-
-// var vertexIndices = [
-//   0, 1, 2, 0, 2, 3,
-//   4, 5, 6, 4, 6, 7,
-//   8, 9, 10, 8, 10, 11,
-//   12, 13, 14, 12, 14, 15,
-// ];
-// var vertexPositions = [
-//   -0.5, -0.5, 0.0, 0.0, -0.5, 0.0, 0.0, 0.0, 0.0, -0.5, 0.0, 0.0,
-//   0.0, -0.5, 0.0, 0.5, -0.5, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0,
-//   0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.5, 0.0,
-//   -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, -0.5, 0.5, 0.0,
-// ];
-// var textureCoords = [
-//   0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5,
-//   0.5, 0.0, 1.0, 0.0, 1.0, 0.5, 0.5, 0.5,
-//   0.5, 0.5, 1.0, 0.5, 1.0, 1.0, 0.5, 1.0,
-//   0.0, 0.5, 0.5, 0.5, 0.5, 1.0, 0.0, 1.0,
-// ];
-
-// var vertexIndices = [];
-// var vertexPositions = [];
-// var textureCoords = [];
-
-// // Define the number of segments in width and height
-// var numSegmentsWidth = 10;
-// var numSegmentsHeight = 10;
-
-// // Calculate the width and height of each segment
-// var segmentWidth = 1.0 / numSegmentsWidth;
-// var segmentHeight = 1.0 / numSegmentsHeight;
-
-// // Loop through each segment in height and width
-// for (var i = 0; i < numSegmentsHeight; i++) {
-//   for (var j = 0; j < numSegmentsWidth; j++) {
-//     // Calculate the vertex positions and texture coordinates for this segment
-//     var x1 = -0.5 + j * segmentWidth;
-//     var y1 = -0.5 + i * segmentHeight;
-//     var x2 = -0.5 + (j + 1) * segmentWidth;
-//     var y2 = -0.5 + (i + 1) * segmentHeight;
-//     var z = 0.0;
-    
-//     var pos = [
-//       x1, y1, z,
-//       x2, y1, z,
-//       x2, y2, z,
-//       x1, y2, z
-//     ];
-//     vertexPositions.push(...pos);
-
-//     // Add the vertex indices for this segment
-//     var baseIndex = i * (numSegmentsWidth + 1) + j;
-//     var indices = [
-//       baseIndex, baseIndex + 1, baseIndex + numSegmentsWidth + 2,
-//       baseIndex, baseIndex + numSegmentsWidth + 2, baseIndex + numSegmentsWidth + 1
-//     ];
-//     vertexIndices.push(...indices);
-
-//     // Add the texture coordinates for this segment
-//     var texCoords = [
-//       j * segmentWidth, i * segmentHeight,
-//       (j + 1) * segmentWidth, i * segmentHeight,
-//       (j + 1) * segmentWidth, (i + 1) * segmentHeight,
-//       j * segmentWidth, (i + 1) * segmentHeight
-//     ];
-//     textureCoords.push(...texCoords);
-//   }
-// }
-// console.log(vertexIndices);
-// console.log(vertexPositions);
-// console.log(textureCoords);
-
 // Define the number of segments for width and height
-const widthSegments = 200;
-const heightSegments = 200;
+var widthSegments = 200;
+var heightSegments = 200;
 
 // Initialize arrays for vertexIndices, vertexPositions, and textureCoords
-const vertexIndices = [];
-const vertexPositions = [];
-const textureCoords = [];
+var vertexIndices = [];
+var vertexPositions = [];
+var textureCoords = [];
 
 // Loop through each row and column to generate vertices, texture coordinates, and indices
-for (let row = 0; row <= heightSegments; row++) {
-  const v = row / heightSegments;
-  for (let col = 0; col <= widthSegments; col++) {
-    const u = col / widthSegments;
+for (var row = 0; row <= heightSegments; row++) {
+  var v = row / heightSegments;
+  for (var col = 0; col <= widthSegments; col++) {
+    var u = col / widthSegments;
 
     // Calculate vertex positions
-    const x = u - 0.5;
-    const y = v - 0.5;
-    const z = 0.0;
+    var x = u - 0.5;
+    var y = v - 0.5;
+    var z = 0.0;
     vertexPositions.push(x, y, z);
 
     // Calculate texture coordinates
@@ -155,10 +47,10 @@ for (let row = 0; row <= heightSegments; row++) {
 
     // Calculate vertex indices
     if (row < heightSegments && col < widthSegments) {
-      const a = row * (widthSegments + 1) + col;
-      const b = a + 1;
-      const c = (row + 1) * (widthSegments + 1) + col;
-      const d = c + 1;
+      var a = row * (widthSegments + 1) + col;
+      var b = a + 1;
+      var c = (row + 1) * (widthSegments + 1) + col;
+      var d = c + 1;
       vertexIndices.push(a, b, c, b, d, c);
     }
   }
@@ -166,8 +58,8 @@ for (let row = 0; row <= heightSegments; row++) {
 
 var attribList = ['aVertexPosition', 'aTextureCoord'];
 var uniformList = [
-  'uDepth', 'uOpacity', 'uSampler', 'uDepthmap', 'uProjMatrix', 'uViewMatrix', 'uModelMatrix', 'uViewportMatrix',
-  'uColorOffset', 'uColorMatrix'
+  'uDepth', 'uOpacity', 'uSampler', 'uDepthmap', 'uProjMatrix', 'uViewMatrix',
+  'uModelMatrix', 'uViewportMatrix', 'uColorOffset', 'uColorMatrix'
 ];
 
 /**
@@ -256,7 +148,7 @@ WebGlCubeDepthRenderer.prototype.renderTile = function (tile, texture, layer, la
 
   mat4.copy(viewMatrix, layer.view().viewMatrix());
   gl.uniformMatrix4fv(shaderProgram.uViewMatrix, false, viewMatrix);
-  
+
   // Generate ModelMatrix.
   // TODO Cache the matrix in the tile object?
   translateVector[0] = tile.centerX();
@@ -268,6 +160,7 @@ WebGlCubeDepthRenderer.prototype.renderTile = function (tile, texture, layer, la
   scaleVector[2] = 1.0;
 
   var modelMatrix = mat4.create();
+  mat4.rotateY(modelMatrix, modelMatrix, -Math.PI / 2);
   mat4.rotateX(modelMatrix, modelMatrix, tile.rotX());
   mat4.rotateY(modelMatrix, modelMatrix, tile.rotY());
   mat4.translate(modelMatrix, modelMatrix, translateVector);
@@ -278,7 +171,7 @@ WebGlCubeDepthRenderer.prototype.renderTile = function (tile, texture, layer, la
   // Depth, Texture, DepthmapTexture.
   setDepth(gl, shaderProgram, layerZ, tile.z);
   setTexture(gl, shaderProgram, texture);
-  setDepthmapTexture(gl, shaderProgram, layer.depthmapStore().texture())
+  setDepthmapTexture(gl, shaderProgram, layer.depthmapStore().texture());
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, constantBuffers.vertexIndices);
   gl.drawElements(gl.TRIANGLES, vertexIndices.length, gl.UNSIGNED_SHORT, 0);

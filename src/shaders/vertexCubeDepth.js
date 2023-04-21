@@ -22,10 +22,17 @@ module.exports = [
   'void main(void) {',
 
   `
+    mat4 flipMatrix = mat4(
+      vec4(-1.0, 0.0, 0.0, 0.0),
+      vec4(0.0, 1.0, 0.0, 0.0),
+      vec4(0.0, 0.0, 1.0, 0.0),
+      vec4(0.0, 0.0, 0.0, 1.0)
+    );
+
     float sh = 0.0, ch = 0.0;
     vec3 ds = vec3(1.0, 0.0, -1.0);
 
-    vec3 a = vec3(uModelMatrix * vec4(aVertexPosition, 1)),
+    vec3 a = vec3(flipMatrix * uModelMatrix * vec4(aVertexPosition, 1.0)),
       g = normalize(a),
       b = g,
       c = normalize(a);
@@ -51,7 +58,7 @@ module.exports = [
       b = b*(d - (pow(j, -ds.z)*l + m) * (d - k*d));
     }
 
-    a = vec3(uViewMatrix * vec4(b, 1)),
+    a = vec3(flipMatrix * uViewMatrix * vec4(b, 1)),
     g = normalize(a);
 
     vec2 e = vec2(a.x, a.z);
