@@ -27,6 +27,7 @@ var cmp = require('../util/cmp');
 var type = require('../util/type');
 var vec3 = require('gl-matrix').vec3;
 var vec4 = require('gl-matrix').vec4;
+var mat4 = require('gl-matrix').mat4;
 
 var neighborsCacheSize = 64;
 
@@ -492,8 +493,10 @@ CubeGeometry.prototype._closestTile = function(view, level) {
   var ray = this._vec;
 
   // Compute a view ray into the central screen point.
-  vec4.set(ray, 0, 0, 1, 1);
-  vec4.transformMat4(ray, ray, view.inverseProjection());
+  vec4.set(ray, 0, 0, 0, 1);
+  var matrix = mat4.create()
+  mat4.multiply(matrix, view.inverseViewMatrix(), view.inverseProjection());
+  vec4.transformMat4(ray, ray, matrix);
 
   var minAngle = Infinity;
   var closestFace = null;

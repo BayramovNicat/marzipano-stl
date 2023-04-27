@@ -27,8 +27,7 @@ module.exports = [
 
     float j = (f.r*65536.0 + f.g*256.0 + f.b)/65793.0;
     vec3 b = c*(1.0 - j);
-    
-    vec3 a = vec3(uViewMatrix * vec4(b, 1));
+    vec3 a = vec3(uViewMatrix * vec4(b.z, b.y, -b.x, 1));
 
     gl_Position = uViewportMatrix * uProjMatrix * vec4(a, 1.0);
     gl_Position.z = uDepth * gl_Position.w;

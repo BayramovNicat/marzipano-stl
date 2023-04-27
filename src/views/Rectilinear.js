@@ -18,6 +18,7 @@
 var eventEmitter = require('minimal-event-emitter');
 var mat4 = require('gl-matrix').mat4;
 var vec4 = require('gl-matrix').vec4;
+var vec3 = require('gl-matrix').vec3;
 var pixelRatio = require('../util/pixelRatio');
 var convertFov = require('../util/convertFov');
 var mod = require('../util/mod');
@@ -240,6 +241,14 @@ RectilinearView.prototype.height = function() {
  */
 RectilinearView.prototype.position = function() {
   return this._position;
+};
+
+/**
+ * Get the camera's invert control flag.
+ * @return {boolean}
+ */
+RectilinearView.prototype.invertControl = function() {
+  return this._invertControl;
 };
 
 /**
@@ -651,31 +660,32 @@ RectilinearView.prototype._updateMatrix = function() {
       fovs.rightDegrees = (hfov/2 - offsetAngleX) * 180/Math.PI;
       fovs.upDegrees = (vfov/2 + offsetAngleY) * 180/Math.PI;
       fovs.downDegrees = (vfov/2 - offsetAngleY) * 180/Math.PI;
-      mat4.perspectiveFromFieldOfView(projMatrix, fovs, 0.1, 100);
+      mat4.perspectiveFromFieldOfView(projMatrix, fovs, -1, 1);
     } else {
-      mat4.perspective(projMatrix, vfov, aspect, 0.1, 100);
+      mat4.perspective(projMatrix, vfov, aspect, -1, 1);
     }
 
     mat4.invert(invProjMatrix, projMatrix);
 
     // View Matrix.
-    var eye = this._position;
-    var target = [0.0, 0.0, 0.0];
-    var up = [0.0, 1.0, 0.0];
-    mat4.lookAt(viewMatrix, eye, target, up);
-    
+    mat4.identity(viewMatrix);
+    mat4.translate(viewMatrix, viewMatrix, vec3.negate(vec3.create(), this._position));
+
     // Invert control.
     var roll = this._invertControl ? -this._roll : this._roll;
     var pitch = this._invertControl ? -this._pitch :this._pitch;
     var yaw = this._invertControl ? -this._yaw : this._yaw;
-    
+
     mat4.rotateZ(viewMatrix, viewMatrix, roll);
     mat4.rotateX(viewMatrix, viewMatrix, pitch);
     mat4.rotateY(viewMatrix, viewMatrix, yaw);
 
     mat4.invert(invViewMatrix, viewMatrix);
 
-    this._matrixToFrustum(projMatrix, frustum);
+    // Get the frustum planes.
+    var matrix = mat4.create();
+    mat4.multiply(matrix, projMatrix, viewMatrix);
+    this._matrixToFrustum(matrix, frustum);
 
     this._matrixChanged = false;
   }
@@ -684,13 +694,12 @@ RectilinearView.prototype._updateMatrix = function() {
 RectilinearView.prototype._matrixToFrustum = function(p, f) {
   // Extract frustum planes from projection matrix.
   // http://www8.cs.umu.se/kurser/5DV051/HT12/lab/plane_extraction.pdf
-  vec4.set(f[0], p[3] + p[0], p[7] + p[4], p[11] + p[8],  0); // left
-  vec4.set(f[1], p[3] - p[0], p[7] - p[4], p[11] - p[8],  0); // right
-  vec4.set(f[2], p[3] + p[1], p[7] + p[5], p[11] + p[9],  0); // top
-  vec4.set(f[3], p[3] - p[1], p[7] - p[5], p[11] - p[9],  0); // bottom
-  vec4.set(f[4], p[3] + p[2], p[7] + p[6], p[11] + p[10], 0); // camera
+  vec4.set(f[0], p[3] + p[0], p[7] + p[4], p[11] + p[8], p[15] + p[12]); // left
+  vec4.set(f[1], p[3] - p[0], p[7] - p[4], p[11] - p[8], p[15] - p[12]); // right
+  vec4.set(f[2], p[3] + p[1], p[7] + p[5], p[11] + p[9], p[15] + p[13]); // top
+  vec4.set(f[3], p[3] - p[1], p[7] - p[5], p[11] - p[9], p[15] - p[13]); // bottom
+  vec4.set(f[4], p[3] + p[2], p[7] + p[6], p[11] + p[10], p[15] + p[14]); // camera
 };
-
 
 /**
  * Returns the projection matrix for the current view.
@@ -751,7 +760,7 @@ RectilinearView.prototype.intersects = function(rectangle) {
     var inside = false;
     for (var j = 0; j < rectangle.length; j++) {
       var corner = rectangle[j];
-      vec4.set(vertex, corner[0], corner[1], corner[2], 0);
+      vec4.set(vertex, corner[0], corner[1], corner[2], 1.0);
       if (vec4.dot(plane, vertex) >= 0) {
         inside = true;
       }
