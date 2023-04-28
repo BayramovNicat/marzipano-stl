@@ -552,7 +552,7 @@ CubeGeometry.prototype.visibleTiles = function(view, level, result) {
   var startingTile = this._closestTile(view, level);
   var count = tileSearcher.search(view, startingTile, result);
   if (!count) {
-    throw new Error('Starting tile is not visible');
+    //throw new Error('Starting tile is not visible');
   }
 
   return result;

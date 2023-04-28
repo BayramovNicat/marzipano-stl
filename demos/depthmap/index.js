@@ -15,7 +15,7 @@ var depthmap = "depthmap.jpg";
 // Create view.
 var limiter = Marzipano.RectilinearView.limit.traditional(4096, 100 * Math.PI / 180);
 var view = new Marzipano.RectilinearView({
-  position: [0.0, 0.0, 2.0],
+  oz: 2.0,
   invertControl: true,
 }, limiter);
 

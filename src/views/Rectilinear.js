@@ -40,7 +40,12 @@ var defaultRoll = 0;
 var defaultFov = Math.PI/4;
 var defaultProjectionCenterX = 0;
 var defaultProjectionCenterY = 0;
-var defaultPosition = [0.0, 0.0, 0.0];
+var defaultTx = 0;
+var defaultTy = 0;
+var defaultTz = 0;
+var defaultOx = 0;
+var defaultOy = 0;
+var defaultOz = 0;
 
 // A fov of exactly 0 or π breaks some computations, so we constrain it to the
 // [fovLimitEpsilon, π - fovLimitEpsilon] interval. We use 6 decimal places for
@@ -124,10 +129,18 @@ function RectilinearView(params, limiter) {
   this._projectionCenterY = params && params.projectionCenterY != null ?
     params.projectionCenterY : defaultProjectionCenterY;
 
-  // The camera's position.
-  this._position = params && params.position != null ? params.position : defaultPosition;
+  // A 3D translation of the viewpoint.
+  this._tx = params && params.tx != null ? params.tx : defaultTx;
+  this._ty = params && params.ty != null ? params.ty : defaultTy;
+  this._tz = params && params.tz != null ? params.tz : defaultTz;
 
-  // TODO Add it here for now.
+  // An additional 3D translation offset of the viewpoint. 
+  // But the viewing rotation will be still from the non-offset point.
+  this._ox = params && params.ox != null ? params.ox : defaultOx;
+  this._oy = params && params.oy != null ? params.oy : defaultOy;
+  this._oz = params && params.oz != null ? params.oz : defaultOz;
+
+  // Invert control.
   this._invertControl = params && params.invertControl != null ? params.invertControl : false;
 
   // The initial value for the view limiter.
@@ -236,15 +249,55 @@ RectilinearView.prototype.height = function() {
 };
 
 /**
- * Get the camera's position.
- * @return {vec3}
+ * Get the viewpoint's tx.
+ * @return {number}
  */
-RectilinearView.prototype.position = function() {
-  return this._position;
+RectilinearView.prototype.tx = function() {
+  return this._tx;
 };
 
 /**
- * Get the camera's invert control flag.
+ * Get the viewpoint's ty.
+ * @return {number}
+ */
+RectilinearView.prototype.ty = function() {
+  return this._ty;
+};
+
+/**
+ * Get the viewpoint's tz.
+ * @return {number}
+ */
+RectilinearView.prototype.tz = function() {
+  return this._tz;
+};
+
+/**
+ * Get the viewpoint's ox.
+ * @return {number}
+ */
+RectilinearView.prototype.ox = function() {
+  return this._ox;
+};
+
+/**
+ * Get the viewpoint's oy.
+ * @return {number}
+ */
+RectilinearView.prototype.oy = function() {
+  return this._oy;
+};
+
+/**
+ * Get the viewpoint's tz.
+ * @return {number}
+ */
+RectilinearView.prototype.oz = function() {
+  return this._oz;
+};
+
+/**
+ * Get the invert control flag.
  * @return {boolean}
  */
 RectilinearView.prototype.invertControl = function() {
@@ -396,16 +449,72 @@ RectilinearView.prototype.setSize = function(size) {
 };
 
 /**
- * Set the camera's position.
- * @param {number} x
- * @param {number} y
- * @param {number} z
+ * Set the viewpoint's tx.
+ * @param {number} tx
  */
-RectilinearView.prototype.setPosition = function(x, y, z) {
+RectilinearView.prototype.setTx = function(tx) {
   this._resetParams();
-  this._params.position = [x, y, z];
+  this._params.tx = tx;
   this._update(this._params);
 }
+
+/**
+ * Set the viewpoint's ty.
+ * @param {number} ty
+ */
+RectilinearView.prototype.setTy = function(ty) {
+  this._resetParams();
+  this._params.ty = ty;
+  this._update(this._params);
+}
+
+/**
+ * Set the viewpoint's tz.
+ * @param {number} tz
+ */
+RectilinearView.prototype.setTz = function(tz) {
+  this._resetParams();
+  this._params.tz = tz;
+  this._update(this._params);
+}
+
+/**
+ * Set the viewpoint's ox.
+ * @param {number} tx
+ */
+RectilinearView.prototype.setOx = function(ox) {
+  this._resetParams();
+  this._params.ox = ox;
+  this._update(this._params);
+}
+
+/**
+ * Set the viewpoint's oy.
+ * @param {number} oy
+ */
+RectilinearView.prototype.setOy = function(oy) {
+  this._resetParams();
+  this._params.oy = oy;
+  this._update(this._params);
+}
+
+/**
+ * Set the viewpoint's oz.
+ * @param {number} oz
+ */
+RectilinearView.prototype.setOz = function(oz) {
+  this._resetParams();
+  this._params.oz = oz;
+  this._update(this._params);
+}
+
+/**
+ * Get the invert control flag.
+ * @return {boolean}
+ */
+RectilinearView.prototype.setInvertControl = function(invertControl) {
+  this._invertControl = invertControl;
+};
 
 /**
  * Set the view parameters. Unspecified parameters are left unchanged.
@@ -463,7 +572,12 @@ RectilinearView.prototype._update = function(params) {
   var oldWidth = this._width;
   var oldHeight = this._height;
   
-  var oldPosition = this._position;
+  var oldTx = this._tx;
+  var oldTy = this._ty;
+  var oldTz = this._tz;
+  var oldOx = this._ox;
+  var oldOy = this._oy;
+  var oldOz = this._oz;
 
   // Fill in object with the new set of parameters to pass into the limiter.
   params.yaw = params.yaw != null ? params.yaw : oldYaw;
@@ -477,7 +591,12 @@ RectilinearView.prototype._update = function(params) {
   params.projectionCenterY = params.projectionCenterY != null ?
     params.projectionCenterY : oldProjectionCenterY;
 
-  params.position = params.position != null ? params.position : oldPosition;
+  params.tx = params.tx != null ? params.tx : oldTx;
+  params.ty = params.ty != null ? params.ty : oldTy;
+  params.tz = params.tz != null ? params.tz : oldTz;
+  params.ox = params.ox != null ? params.ox : oldOx;
+  params.oy = params.oy != null ? params.oy : oldOy;
+  params.oz = params.oz != null ? params.oz : oldOz;
 
   // Apply view limiting when defined.
   if (this._limiter) {
@@ -500,7 +619,12 @@ RectilinearView.prototype._update = function(params) {
   var newProjectionCenterX = params.projectionCenterX;
   var newProjectionCenterY = params.projectionCenterY;
 
-  var newPosition = params.position;
+  var newTx = params.tx;
+  var newTy = params.ty;
+  var newTz = params.tz;
+  var newOx = params.ox;
+  var newOy = params.oy;
+  var newOz = params.oz;
 
   // Consistency check.
   if (!real(newYaw) || !real(newPitch) || !real(newRoll) ||
@@ -519,16 +643,20 @@ RectilinearView.prototype._update = function(params) {
   this._projectionCenterX = newProjectionCenterX;
   this._projectionCenterY = newProjectionCenterY;
   
-  this._position = newPosition;
+  this._tx = newTx;
+  this._ty = newTy;
+  this._tz = newTz;
+  this._ox = newOx;
+  this._oy = newOy;
+  this._oz = newOz;
 
   // Check whether the parameters changed and emit the corresponding events.
   if (newYaw !== oldYaw || newPitch !== oldPitch || newRoll !== oldRoll ||
       newFov !== oldFov || newWidth !== oldWidth || newHeight !== oldHeight ||
       newProjectionCenterX !== oldProjectionCenterX ||
       newProjectionCenterY !== oldProjectionCenterY ||
-      newPosition[0] !== oldPosition[0] || 
-      newPosition[1] !== oldPosition[1] || 
-      newPosition[2] !== oldPosition[2]) {
+      newTx !== oldTx || newTy !== oldTy || newTz !== oldTz ||
+      newOx !== oldOx || newOy !== oldOy || newOz !== oldOz) {
     this._matrixChanged = true;
     this.emit('change');
   }
@@ -669,16 +797,17 @@ RectilinearView.prototype._updateMatrix = function() {
 
     // View Matrix.
     mat4.identity(viewMatrix);
-    mat4.translate(viewMatrix, viewMatrix, vec3.negate(vec3.create(), this._position));
+    mat4.translate(viewMatrix, viewMatrix, vec3.negate(vec3.create(), [this._ox, this._oy, this._oz]));
 
     // Invert control.
     var roll = this._invertControl ? -this._roll : this._roll;
     var pitch = this._invertControl ? -this._pitch :this._pitch;
     var yaw = this._invertControl ? -this._yaw : this._yaw;
-
     mat4.rotateZ(viewMatrix, viewMatrix, roll);
     mat4.rotateX(viewMatrix, viewMatrix, pitch);
     mat4.rotateY(viewMatrix, viewMatrix, yaw);
+
+    mat4.translate(viewMatrix, viewMatrix, vec3.negate(vec3.create(), [this._tx, this._ty, this._tz]));
 
     mat4.invert(invViewMatrix, viewMatrix);
 

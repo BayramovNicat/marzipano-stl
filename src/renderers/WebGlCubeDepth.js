@@ -22,8 +22,8 @@ var vertexSrc = require('../shaders/vertexCubeDepth');
 var fragmentSrc = require('../shaders/fragmentCubeDepth');
 
 // Define the number of segments for width and height
-var widthSegments = 200;
-var heightSegments = 200;
+var widthSegments = 40;
+var heightSegments = 40;
 
 // Initialize arrays for vertexIndices, vertexPositions, and textureCoords
 var vertexIndices = [];
