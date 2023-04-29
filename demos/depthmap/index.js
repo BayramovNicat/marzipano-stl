@@ -1,7 +1,9 @@
 'use strict';
 
 // Create viewer.
-var viewer = new Marzipano.Viewer(document.getElementById('pano'));
+var viewer = new Marzipano.Viewer(document.getElementById('pano'), {
+  stage: {widthSegments: 200, heightSegments: 200}
+});
 
 // Create source.
 var source = Marzipano.ImageUrlSource.fromString("panos/{f}.jpg");

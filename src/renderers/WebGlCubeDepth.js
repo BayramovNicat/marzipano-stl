@@ -21,37 +21,39 @@ var setDepthmapTexture = WebGlCommon.setDepthmapTexture
 var vertexSrc = require('../shaders/vertexCubeDepth');
 var fragmentSrc = require('../shaders/fragmentCubeDepth');
 
-// Define the number of segments for width and height
-var widthSegments = 40;
-var heightSegments = 40;
-
 // Initialize arrays for vertexIndices, vertexPositions, and textureCoords
 var vertexIndices = [];
 var vertexPositions = [];
 var textureCoords = [];
 
-// Loop through each row and column to generate vertices, texture coordinates, and indices
-for (var row = 0; row <= heightSegments; row++) {
-  var v = row / heightSegments;
-  for (var col = 0; col <= widthSegments; col++) {
-    var u = col / widthSegments;
+var defaultWidthSegments = 40;
+var defaultHeightSegments = 40;
 
-    // Calculate vertex positions
-    var x = u - 0.5;
-    var y = v - 0.5;
-    var z = 0.0;
-    vertexPositions.push(x, y, z);
+function createVertexDatas(widthSegments, heightSegments) {
 
-    // Calculate texture coordinates
-    textureCoords.push(u, v);
+  // Loop through each row and column to generate vertices, texture coordinates, and indices
+  for (var row = 0; row <= heightSegments; row++) {
+    var v = row / heightSegments;
+    for (var col = 0; col <= widthSegments; col++) {
+      var u = col / widthSegments;
 
-    // Calculate vertex indices
-    if (row < heightSegments && col < widthSegments) {
-      var a = row * (widthSegments + 1) + col;
-      var b = a + 1;
-      var c = (row + 1) * (widthSegments + 1) + col;
-      var d = c + 1;
-      vertexIndices.push(a, b, c, b, d, c);
+      // Calculate vertex positions
+      var x = u - 0.5;
+      var y = v - 0.5;
+      var z = 0.0;
+      vertexPositions.push(x, y, z);
+
+      // Calculate texture coordinates
+      textureCoords.push(u, v);
+
+      // Calculate vertex indices
+      if (row < heightSegments && col < widthSegments) {
+        var a = row * (widthSegments + 1) + col;
+        var b = a + 1;
+        var c = (row + 1) * (widthSegments + 1) + col;
+        var d = c + 1;
+        vertexIndices.push(a, b, c, b, d, c);
+      }
     }
   }
 }
@@ -61,6 +63,8 @@ var uniformList = [
   'uDepth', 'uOpacity', 'uSampler', 'uDepthmap', 'uProjMatrix', 'uViewMatrix',
   'uModelMatrix', 'uViewportMatrix', 'uColorOffset', 'uColorMatrix'
 ];
+
+
 
 /**
  * @class WebGlCubeDepthRenderer
@@ -73,7 +77,7 @@ var uniformList = [
  * Most users do not need to instantiate this class. Renderers are created and
  * destroyed by {@link Stage} as necessary.
  */
-function WebGlCubeDepthRenderer(gl) {
+function WebGlCubeDepthRenderer(gl, opts) {
   this.gl = gl;
 
   // The projection matrix positions the tiles in world space.
@@ -92,6 +96,10 @@ function WebGlCubeDepthRenderer(gl) {
   this.translateVector = vec3.create();
   this.scaleVector = vec3.create();
 
+  var widthSegments = opts && opts.widthSegments ? opts.widthSegments : defaultWidthSegments;
+  var heightSegments = opts && opts.heightSegments ? opts.heightSegments : defaultHeightSegments;
+  createVertexDatas(widthSegments, heightSegments);
+  
   this.constantBuffers = createConstantBuffers(gl, vertexIndices, vertexPositions, textureCoords);
 
   this.shaderProgram = createShaderProgram(gl, vertexSrc, fragmentSrc, attribList, uniformList);

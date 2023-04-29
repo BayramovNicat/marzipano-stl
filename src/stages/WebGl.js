@@ -122,6 +122,10 @@ function WebGlStage(opts) {
   // existing renderers so they can be reused across layers with the same
   // geometry and view type.
   this._rendererInstances = [];
+
+  // Width and Height segments for depthmap mesh.
+  this._widthSegments = opts.widthSegments ? opts.widthSegments : undefined;
+  this._heightSegments = opts.heightSegments ? opts.heightSegments : undefined;
 }
 
 inherits(WebGlStage, Stage);
@@ -199,7 +203,10 @@ WebGlStage.prototype.createRenderer = function(Renderer) {
       return rendererInstances[i];
     }
   }
-  var renderer = new Renderer(this._gl);
+  var renderer = new Renderer(this._gl, {
+    widthSegments: this._widthSegments,
+    heightSegments: this._heightSegments
+  });
   rendererInstances.push(renderer);
   return renderer;
 };
