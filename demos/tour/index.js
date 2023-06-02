@@ -8,15 +8,21 @@ var viewer = new Marzipano.Viewer(document.getElementById('pano'));
 // from 1 instead of 0. Hence, we cannot use ImageUrlSource.fromString()
 // and must write a custom function to convert tiles into URLs.
 var urlPrefix = "panos/38997312";
+var previewUrl = urlPrefix + "/preview.jpg";
 var tileUrl = function (f, z, x, y) {
   return urlPrefix + "/l" + z + "_" + f + "_" + y + "_" + x + ".jpg";
 };
 var source = new Marzipano.ImageUrlSource(function (tile) {
-  return { url: tileUrl(tile.face, tile.z + 1, tile.x + 1, tile.y + 1) };
+  if (tile.z === 0) {
+    var mapY = 'lfrbud'.indexOf(tile.face) / 6;
+    return { url: previewUrl, rect: { x: 0, y: mapY, width: 1, height: 1 / 6 } };
+  }
+  return { url: tileUrl(tile.face, tile.z, tile.x + 1, tile.y + 1) };
 });
 
 // Create geometry.
 var geometry = new Marzipano.CubeGeometry([
+  { tileSize: 256, size: 256 },
   { tileSize: 512, size: 512 },
   { tileSize: 512, size: 1024 },
   { tileSize: 512, size: 2048 },
