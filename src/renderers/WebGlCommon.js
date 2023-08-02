@@ -134,6 +134,12 @@ function setDepthmapTexture(gl, shaderProgram, texture) {
   gl.uniform1i(shaderProgram.uDepthmap, 1);
 }
 
+function setDepthmapCubeTexture(gl, shaderProgram, texture) {
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+  gl.uniform1i(shaderProgram.uDepthmap, 1);
+}
+
 function setDepth(gl, shaderProgram, layerZ, tileZ) {
   var depth = (((layerZ + 1) * MAX_LEVELS) - tileZ) / (MAX_LEVELS * MAX_LAYERS);
   gl.uniform1f(shaderProgram.uDepth, depth);
@@ -232,6 +238,7 @@ module.exports = {
   disableAttributes: disableAttributes,
   setTexture: setTexture,
   setDepthmapTexture: setDepthmapTexture,
+  setDepthmapCubeTexture: setDepthmapCubeTexture,
   setDepth: setDepth,
   setViewport: setViewport,
   setupPixelEffectUniforms: setupPixelEffectUniforms

@@ -25,7 +25,7 @@ var view = new Marzipano.RectilinearView({
 var scene = viewer.createScene({
   source: source,
   geometry: geometry,
-  //depthmap: depthmap,
+  depthmap: depthmap,
   view: view,
   pinFirstLevel: true
 });

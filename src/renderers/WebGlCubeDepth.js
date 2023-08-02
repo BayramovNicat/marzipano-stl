@@ -16,10 +16,12 @@ var setupPixelEffectUniforms = WebGlCommon.setupPixelEffectUniforms;
 
 var setDepth = WebGlCommon.setDepth;
 var setTexture = WebGlCommon.setTexture;
-var setDepthmapTexture = WebGlCommon.setDepthmapTexture
+var setDepthmapTexture = WebGlCommon.setDepthmapTexture;
+var setDepthmapCubeTexture = WebGlCommon.setDepthmapCubeTexture;
 
 var vertexSrc = require('../shaders/vertexCubeDepth');
 var fragmentSrc = require('../shaders/fragmentCubeDepth');
+var vertexSTLSrc = require('../shaders/vertexCubeDepthSTL');
 
 // Initialize arrays for vertexIndices, vertexPositions, and textureCoords
 var vertexIndices = [];
@@ -102,7 +104,11 @@ function WebGlCubeDepthRenderer(gl, opts) {
   
   this.constantBuffers = createConstantBuffers(gl, vertexIndices, vertexPositions, textureCoords);
 
-  this.shaderProgram = createShaderProgram(gl, vertexSrc, fragmentSrc, attribList, uniformList);
+  if (opts.layer.depthmapStore().sourceType() == 'stl') {
+    this.shaderProgram = createShaderProgram(gl, vertexSTLSrc, fragmentSrc, attribList, uniformList);
+  } else {
+    this.shaderProgram = createShaderProgram(gl, vertexSrc, fragmentSrc, attribList, uniformList);
+  }
 }
 
 WebGlCubeDepthRenderer.prototype.destroy = function () {
@@ -176,10 +182,17 @@ WebGlCubeDepthRenderer.prototype.renderTile = function (tile, texture, layer, la
 
   gl.uniformMatrix4fv(shaderProgram.uModelMatrix, false, modelMatrix);
 
-  // Depth, Texture, DepthmapTexture.
+  // Depth, Texture.
   setDepth(gl, shaderProgram, layerZ, tile.z);
   setTexture(gl, shaderProgram, texture);
-  setDepthmapTexture(gl, shaderProgram, layer.depthmapStore().texture());
+
+  // DepthmapTexture.
+  var depthmapStore = layer.depthmapStore();
+  if (depthmapStore.sourceType() == 'stl') {
+    setDepthmapCubeTexture(gl, shaderProgram, depthmapStore.cubeTexture());
+  } else {
+    setDepthmapTexture(gl, shaderProgram, depthmapStore.texture());
+  }
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, constantBuffers.vertexIndices);
   gl.drawElements(gl.TRIANGLES, vertexIndices.length, gl.UNSIGNED_SHORT, 0);

@@ -17,6 +17,7 @@
 
 var Stage = require('./Stage');
 var HtmlImageLoader = require('../loaders/HtmlImage');
+var HtmlModelLoader = require('../loaders/HtmlModel');
 var browser = require('bowser');
 var inherits = require('../util/inherits');
 var pixelRatio = require('../util/pixelRatio');
@@ -102,6 +103,7 @@ function WebGlStage(opts) {
     opts.generateMipmaps : false;
 
   this._loader = new HtmlImageLoader(this);
+  this._modelLoader = new HtmlModelLoader(this);
 
   this._domElement = document.createElement('canvas');
 
@@ -181,6 +183,9 @@ WebGlStage.prototype.loadImage = function(url, rect, done) {
   return this._loader.loadImage(url, rect, done);
 };
 
+WebGlStage.prototype.loadModel = function(url, done) {
+  return this._modelLoader.loadModel(url, done);
+};
 
 WebGlStage.prototype.maxTextureSize = function() {
   return this._gl.getParameter(this._gl.MAX_TEXTURE_SIZE);
@@ -196,7 +201,7 @@ WebGlStage.prototype.validateLayer = function(layer) {
 };
 
 
-WebGlStage.prototype.createRenderer = function(Renderer) {
+WebGlStage.prototype.createRenderer = function(Renderer, opts) {
   var rendererInstances = this._rendererInstances;
   for (var i = 0; i < rendererInstances.length; i++) {
     if (rendererInstances[i] instanceof Renderer) {
@@ -205,7 +210,8 @@ WebGlStage.prototype.createRenderer = function(Renderer) {
   }
   var renderer = new Renderer(this._gl, {
     widthSegments: this._widthSegments,
-    heightSegments: this._heightSegments
+    heightSegments: this._heightSegments,
+    ...opts
   });
   rendererInstances.push(renderer);
   return renderer;

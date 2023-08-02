@@ -229,6 +229,15 @@ Stage.prototype.loadImage = function() {
   throw new Error('Stage implementation must override loadImage');
 };
 
+/**
+ * Loads an {@link Asset} from a 3D model file, only support STL for now.
+ * @param {string} url The STL file URL.
+ * @param {function(?Error, Asset)} done The callback.
+ * @return {function()} A function to cancel loading.
+ */
+Stage.prototype.loadModel = function() {
+  throw new Error('Stage implementation must override loadSTLModel');
+};
 
 Stage.prototype._emitRenderInvalid = function() {
   this.emit('renderInvalid');
@@ -301,7 +310,7 @@ Stage.prototype.addLayer = function(layer, i) {
     throw new Error('No ' + this.type + ' renderer avaiable for ' +
         geometryType + ' geometry and ' + viewType + ' view');
   }
-  var renderer = this.createRenderer(rendererClass);
+  var renderer = this.createRenderer(rendererClass, { layer });
 
   this._layers.splice(i, 0, layer);
   this._renderers.splice(i, 0, renderer);
@@ -630,7 +639,7 @@ Stage.prototype._collectTileIntoList = function(tile, tileList) {
 };
 
 /**
- * Create a texture for the given tile and asset. Called by {@link TextureStore}.
+ * Create a texture for the given tile and asset. Called by {@link TextureStore} and {@link DepthmapStore}.
  * @param {Tile} tile
  * @param {Asset} asset
  * @param {Function} done
