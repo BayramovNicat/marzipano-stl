@@ -281,9 +281,9 @@ function na(gl, program, verticesBuffer, indicesBuffer, verticesArray, indicesAr
 
   const size = 512;
   const e = [
-    gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-    gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
     gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+    gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+    gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
     gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
     gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
     gl.TEXTURE_CUBE_MAP_NEGATIVE_Y
@@ -330,9 +330,6 @@ function na(gl, program, verticesBuffer, indicesBuffer, verticesArray, indicesAr
   const viewPort = gl.getParameter(gl.VIEWPORT);
   gl.viewport(0, 0, size, size);
 
-  //gl.disable(gl.SCISSOR_TEST);
-  //gl.scissor(0, 0, 300, 150);
-
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.ONE_MINUS_SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -356,7 +353,7 @@ function na(gl, program, verticesBuffer, indicesBuffer, verticesArray, indicesAr
 
   Math.sqrt(q);
   m = Math.ceil(Math.sqrt(m) + /*p.length()*/ 0);
-  m *= /*a.farscale*/ 1;
+  //m *= /*a.farscale*/ 1;
 
   //gl.uniform1f(e.r, m);
   gl.bindBuffer(gl.ARRAY_BUFFER, verticesBuffer);
@@ -369,6 +366,7 @@ function na(gl, program, verticesBuffer, indicesBuffer, verticesArray, indicesAr
 
   G = za();
 
+  const mx = gl.getUniformLocation(program, 'mx');
   for (let i = 0; i < 6; i++) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, h[i]);
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderBuffer);
@@ -377,8 +375,7 @@ function na(gl, program, verticesBuffer, indicesBuffer, verticesArray, indicesAr
     Gd(t, i < 4 ? 90 * (i - 0) : 90, i == 5 ? 90 : i == 5 ? -90 : 0, 0);    // Rotation?
     Ad(G, -1 * p.z, 1 * p.y, 1 * p.x);
     se(t, G);
-
-    const mx = gl.getUniformLocation(program, 'mx');
+    
     gl.uniformMatrix4fv(mx, false, t);
     gl.drawElements(gl.TRIANGLES, indicesArray.length, gl.UNSIGNED_INT, 0);
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, null);
@@ -474,7 +471,12 @@ DepthmapStore.prototype.createCubeTexture = function (gl, positions, indices) {
 
   this._cubeTexture = na(gl,program, verticesBuffer, indicesBuffer, verticesArray, indicesArray);
 
-  // TODO delete buffer?
+  // Delete resources.
+  gl.deleteShader(vertexShader);
+  gl.deleteShader(fragmentShader);
+  gl.deleteProgram(program);
+  gl.deleteBuffer(verticesBuffer);
+  gl.deleteBuffer(indicesBuffer);
 };
 
 /**
