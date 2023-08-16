@@ -50,12 +50,6 @@ HtmlModelLoader.prototype._handleLoad = function (data, done) {
   // Split the STL data into lines
   const lines = data.trim().split('\n');
 
-  // Helper function to parse a vector (e.g., "vertex" or "facet normal")
-  function parseVector(line) {
-    const parts = line.trim().split(/\s+/).slice(1).map(parseFloat);
-    return parts;
-  }
-
   // Iterate through each line to extract positions and indices
   let vertexIndex = 0;
   for (let i = 0; i < lines.length; i++) {
@@ -64,14 +58,15 @@ HtmlModelLoader.prototype._handleLoad = function (data, done) {
 
     if (parts[0] === 'vertex') {
       // Parse vertex position and add it to the positions array
-      const vertex = parseVector(line);
+      const vertex = line.trim().split(/\s+/).slice(1).map(parseFloat);
 
       const x = vertex[0];
       const z = vertex[1];
       const y = vertex[2];
 
-      positions.push(-z, -y, x);
       //positions.push(x, y, z);
+      positions.push(z, y, x);
+      //positions.push(-x, -y, -z);
       vertexIndex++;
     } else if (parts[0] === 'facet') {
       // Skip the facet normal line

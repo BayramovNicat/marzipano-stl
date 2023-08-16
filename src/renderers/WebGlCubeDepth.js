@@ -174,7 +174,9 @@ WebGlCubeDepthRenderer.prototype.renderTile = function (tile, texture, layer, la
   scaleVector[2] = 1.0;
 
   var modelMatrix = mat4.create();
-  mat4.rotateY(modelMatrix, modelMatrix, -Math.PI / 2);
+  if (layer.depthmapStore().sourceType() != 'stl') {
+    mat4.rotateY(modelMatrix, modelMatrix, -Math.PI / 2);
+  }
   mat4.rotateX(modelMatrix, modelMatrix, tile.rotX());
   mat4.rotateY(modelMatrix, modelMatrix, tile.rotY());
   mat4.translate(modelMatrix, modelMatrix, translateVector);

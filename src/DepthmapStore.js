@@ -281,12 +281,12 @@ function na(gl, program, verticesBuffer, indicesBuffer, verticesArray, indicesAr
 
   const size = 512;
   const e = [
-    gl.TEXTURE_CUBE_MAP_POSITIVE_X,
     gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-    gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+    gl.TEXTURE_CUBE_MAP_POSITIVE_X,
     gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+    gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+    gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
     gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-    gl.TEXTURE_CUBE_MAP_NEGATIVE_Y
   ];
 
   var texture = gl.createTexture();
@@ -372,7 +372,7 @@ function na(gl, program, verticesBuffer, indicesBuffer, verticesArray, indicesAr
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderBuffer);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
-    Gd(t, i < 4 ? 90 * (i - 0) : 90, i == 5 ? 90 : i == 5 ? -90 : 0, 0);    // Rotation?
+    Gd(t, i < 4 ? 90 * (i - 0) : 90, i == 4 ? 90 : i == 5 ? -90 : 0, 0);    // Rotation?
     Ad(G, -1 * p.z, 1 * p.y, 1 * p.x);
     se(t, G);
     
