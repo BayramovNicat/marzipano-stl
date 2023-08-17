@@ -396,6 +396,8 @@ function na(gl, program, verticesBuffer, indicesBuffer, verticesArray, indicesAr
  */
 DepthmapStore.prototype.createCubeTexture = function (gl, positions, indices) {
 
+  gl.getExtension("OES_element_index_uint");
+
   // Define the vertex shader code
   const vertexShaderSource = `
     attribute vec3 a_position;
