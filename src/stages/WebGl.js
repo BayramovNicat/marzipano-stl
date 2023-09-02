@@ -52,6 +52,11 @@ function initWebGlContext(canvas, opts) {
     throw new Error('Could not get WebGL context');
   }
 
+  // Enable back-face culling
+  gl.enable(gl.CULL_FACE);
+  gl.frontFace(gl.CW);
+  gl.cullFace(gl.FRONT); // Discard front-facing triangles
+  
   if (opts.wrapContext) {
     gl = opts.wrapContext(gl);
   }
