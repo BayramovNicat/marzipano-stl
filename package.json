@@ -30,6 +30,7 @@
   "devDependencies": {
     "browserify": "^17.0.0",
     "chai": "^4.2.0",
+    "eslint": "^8.56.0",
     "jsdoc": "^3.6.6",
     "lr-http-server": "^0.1.5",
     "mocha": "^8.2.1",
