@@ -53,8 +53,8 @@ function getActivePano() {
 
 export default {
     RES_16K,
-    GEOMETRY: createGeometry(),
-    VIEW: createView(),
+    geometry: createGeometry(),
+    view: createView(),
     setViewer,
     getViewer,
     setAngle,

@@ -18,7 +18,7 @@ function deltaByAngle(angle, radius) {
 }
 
 function goto(duration, x, y, z) {
-    const { VIEW } = Viewer;
+    const { view } = Viewer;
 
     const tx = 0,
         ty = 0,
@@ -30,9 +30,9 @@ function goto(duration, x, y, z) {
     Marzipano.util.tween(
         duration,
         (tweenVal) => {
-            VIEW.setTx(tx + dx * tweenVal);
-            VIEW.setTy(ty + dy * tweenVal);
-            VIEW.setTz(tz + dz * tweenVal);
+            view.setTx(tx + dx * tweenVal);
+            view.setTy(ty + dy * tweenVal);
+            view.setTz(tz + dz * tweenVal);
         },
         () => {}
     );

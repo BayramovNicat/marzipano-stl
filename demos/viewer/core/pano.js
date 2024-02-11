@@ -1,12 +1,13 @@
-import panoramasData from "../data/panoramas.js";
+class Pano {
+    panoramas = [];
 
-const panoramas = panoramasData;
+    loadPanos(panos) {
+        this.panoramas = panos;
+    }
 
-function findPano(panoId) {
-    return panoramas.find((panorama) => panorama.id === panoId);
+    findPano(panoId) {
+        return this.panoramas.find((panorama) => panorama.id === panoId);
+    }
 }
 
-export default {
-    panoramas,
-    findPano,
-};
+export default new Pano();

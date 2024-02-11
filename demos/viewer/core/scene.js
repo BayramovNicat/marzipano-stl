@@ -50,7 +50,7 @@ function tileUrl(face, z, x, y, image, version, multiplier) {
     const image_width = 6144 * multiplier;
     const face_width = image_width / 3;
     const faceCoordinates = getFaceCoordinates(face, face_width);
-    const tile = Math.pow(2, z - 1);
+    const tile = Math.pow(2, (!z ? 1 : z) - 1);
     const tile_width = face_width / tile;
     const tileCoordinates = {
         x1: faceCoordinates.x1 + tile_width * (x - 1),
@@ -69,68 +69,75 @@ function tileUrl(face, z, x, y, image, version, multiplier) {
     }${resize}&${quality}${end}`;
 }
 
-function createImageUrlSource(pano) {
-    const urlArr = pano.url.split("?");
-    const image = urlArr[0];
-    const version = parseInt(urlArr[1].split(":")[1]);
-    const multiplier = Viewer.RES_16K ? 2 : 1;
-
-    return new Marzipano.ImageUrlSource(
-        (tile) => {
-            if (tile.z === 0) {
-                const mapY = "lfrbud".indexOf(tile.face) / 6;
-                return {
-                    url: `${IMG_HOST}cube/${image.replace(
-                        ".jpg",
-                        `_thumb_${version}.jpg`
-                    )}?save=optimize,progressive,qual:70`,
-                    rect: { x: 0, y: mapY, width: 1, height: 1 / 6 },
-                };
-            } else {
-                return {
-                    url: tileUrl(
-                        tile.face,
-                        tile.z,
-                        tile.x + 1,
-                        tile.y + 1,
-                        image,
-                        version,
-                        multiplier
-                    ),
-                };
-            }
-        },
-        { concurrency: 10 }
-    );
-}
-
 const scenes = [];
 function findSceneById(id) {
     return scenes.find((item) => item.id === id)?.scene;
 }
-function addScene(pano) {
-    const scene = Viewer.getViewer().createScene({
-        source: createImageUrlSource(pano),
-        geometry: Viewer.GEOMETRY,
-        view: Viewer.VIEW,
-        pinFirstLevel: true,
-    });
 
-    scenes.push({
-        id: pano.id,
-        scene: scene,
-    });
+class Scene {
+    createImageUrlSource(pano, face = false) {
+        const urlArr = pano.url.split("?");
+        const image = urlArr[0];
+        const version = parseInt(urlArr[1].split(":")[1]);
+        const multiplier = Viewer.RES_16K ? 2 : 1;
 
-    return scene;
+        return new Marzipano.ImageUrlSource(
+            (tile) => {
+                if (tile.z === 0 && !face) {
+                    const mapY = "lfrbud".indexOf(tile.face) / 6;
+                    return {
+                        url: `${IMG_HOST}cube/${image.replace(
+                            ".jpg",
+                            `_thumb_${version}.jpg`
+                        )}?save=optimize,progressive,qual:70`,
+                        rect: { x: 0, y: mapY, width: 1, height: 1 / 6 },
+                    };
+                } else {
+                    return {
+                        url: tileUrl(
+                            tile.face,
+                            tile.z,
+                            tile.x + 1,
+                            tile.y + 1,
+                            image,
+                            version,
+                            multiplier
+                        ),
+                    };
+                }
+            },
+            { concurrency: 10 }
+        );
+    }
+
+    createScene(pano) {
+        const { geometry, view } = Viewer;
+        const source = this.createImageUrlSource(pano);
+        return Viewer.getViewer().createScene({
+            source,
+            geometry,
+            view,
+            pinFirstLevel: true,
+        });
+    }
+
+    addScene(pano) {
+        const scene = this.createScene(pano);
+
+        scenes.push({
+            id: pano.id,
+            scene: scene,
+        });
+
+        return scene;
+    }
+
+    loadScene(pano) {
+        const existingScene = findSceneById(pano.id);
+        if (existingScene) return existingScene;
+
+        return this.addScene(pano);
+    }
 }
 
-function loadScene(pano) {
-    const existingScene = findSceneById(pano.id);
-    if (existingScene) return existingScene;
-
-    return addScene(pano);
-}
-
-export default {
-    loadScene,
-};
+export default new Scene();
